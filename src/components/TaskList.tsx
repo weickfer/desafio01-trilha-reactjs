@@ -3,6 +3,7 @@ import { useState } from 'react'
 import '../styles/tasklist.scss'
 
 import { FiTrash, FiCheckSquare } from 'react-icons/fi'
+import { useLocalStorageState } from '../hooks/useLocalStorageState';
 
 interface Task {
   id: number;
@@ -11,7 +12,11 @@ interface Task {
 }
 
 export function TaskList() {
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const [tasks, setTasks] = useLocalStorageState<Task[]>({
+    key: '@to.do:tasks',
+    initialValue: []
+  });
+
   const [newTaskTitle, setNewTaskTitle] = useState('');
 
   function handleCreateNewTask() {
@@ -19,23 +24,24 @@ export function TaskList() {
       return
     }
 
-    setTasks(tasks => {
-      const task: Task = {
-        id: tasks.length + 1,
-        title: newTaskTitle,
-        isComplete: false,
-      }
+    const id = tasks.length + 1;
+    const newTask: Task = {
+      id,
+      isComplete: false,
+      title: newTaskTitle,
+    }
 
-      return [...tasks, ...[task]]
-    })
-
+    setTasks([...tasks, newTask])
     setNewTaskTitle('')
   }
 
   function handleToggleTaskCompletion(id: number) {
-    const updatedTasks = tasks.map<Task>(task => {
+    const updatedTasks = tasks.map(task => {
       if (task.id === id) {
-        task.isComplete = !task.isComplete;
+        return {
+          ...task,
+          isComplete: !task.isComplete
+        }
       }
 
       return task
@@ -45,7 +51,9 @@ export function TaskList() {
   }
 
   function handleRemoveTask(id: number) {
-    setTasks(tasks => tasks.filter(task => !(task.id === id)))
+    const updatedTasks = tasks.filter(task => !(task.id === id))
+
+    setTasks(updatedTasks)
   }
 
   return (
