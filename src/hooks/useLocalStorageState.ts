@@ -5,6 +5,7 @@ type UseLocalStorageStateParams<T> = {
   initialValue: T;
 }
 
+
 type SetStateValue<T> = (value: T | ((value: T) => T)) => void
 type UseLocalStorageStateResult<T> = [T, SetStateValue<T>]
 
